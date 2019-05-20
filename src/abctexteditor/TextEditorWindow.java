@@ -6,6 +6,7 @@
 package abctexteditor;
 
 import java.awt.FileDialog;
+import java.awt.TextArea;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -21,6 +22,7 @@ import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoManager;
 
 
@@ -34,12 +36,15 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private File currentFile;
     private String fileName; 
     private UndoManager undoManager = new UndoManager();
+    private ChangesDocumentListener documentListener = new ChangesDocumentListener();
+    private StyledDocument document;
     
     public TextEditorWindow() {
         initComponents();
-        this.textArea.getDocument().addUndoableEditListener(undoManager);
-        
-        // UI Related
+        this.document = textArea.getStyledDocument();
+        document.addUndoableEditListener(undoManager);
+        document.addDocumentListener(documentListener);
+        // Set up UI
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.setTitle(windowTitle);
@@ -220,7 +225,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
     // FIXME
     private void menuItemNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemNewActionPerformed
-        if (currentFile != null){ // Missing attribute that checks if it has been changed 
+        if (currentFile != null && documentListener.detectedChanges()){ // Missing attribute that checks if it has been changed 
             int choosenOption = JOptionPane.showConfirmDialog(null, "Do you want to save before closing?", "Wait!" , JOptionPane.YES_NO_OPTION);
             if (choosenOption == JOptionPane.YES_OPTION){
                 saveFile();
