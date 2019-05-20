@@ -12,9 +12,17 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Formatter;
+import java.util.Scanner;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.undo.UndoManager;
+
 
 /**
  *
@@ -22,16 +30,25 @@ import java.io.IOException;
  */
 public class TextEditorWindow extends javax.swing.JFrame {
 
-
+    private final String windowTitle = "ABC Text Editor";
+    private File currentFile;
     private String fileName; 
-    private Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used for cut,copy and paste functions
-    
-    
+    private UndoManager undoManager = new UndoManager();
     
     public TextEditorWindow() {
         initComponents();
-        this.setTitle("ABC Text Editor");
-        setIcon();
+        this.textArea.getDocument().addUndoableEditListener(undoManager);
+        
+        // UI Related
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            this.setTitle(windowTitle);
+            setIcon();
+        } 
+        catch (Exception e) {
+            System.out.println("Error while setting up system look and feel: " + e.getMessage());
+        }
+
     }
 
     /**
@@ -44,8 +61,8 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         panelMain = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        textArea = new javax.swing.JTextArea();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        textArea = new javax.swing.JTextPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         menuItemNew = new javax.swing.JMenuItem();
@@ -64,9 +81,8 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
         panelMain.setBackground(new java.awt.Color(47, 53, 66));
 
-        textArea.setColumns(20);
-        textArea.setRows(5);
-        jScrollPane1.setViewportView(textArea);
+        textArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        jScrollPane3.setViewportView(textArea);
 
         javax.swing.GroupLayout panelMainLayout = new javax.swing.GroupLayout(panelMain);
         panelMain.setLayout(panelMainLayout);
@@ -74,14 +90,14 @@ public class TextEditorWindow extends javax.swing.JFrame {
             panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
                 .addContainerGap())
         );
         panelMainLayout.setVerticalGroup(
             panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -120,18 +136,35 @@ public class TextEditorWindow extends javax.swing.JFrame {
         menuItemSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/diskette.png"))); // NOI18N
         menuItemSaveAs.setText("Save as");
         menuItemSaveAs.setToolTipText("");
+        menuItemSaveAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemSaveAsActionPerformed(evt);
+            }
+        });
         jMenu1.add(menuItemSaveAs);
 
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Edit");
 
+        menuItemUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
         menuItemUndo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/undo.png"))); // NOI18N
         menuItemUndo.setText("Undo");
+        menuItemUndo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemUndoActionPerformed(evt);
+            }
+        });
         jMenu2.add(menuItemUndo);
 
+        menuItemRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
         menuItemRedo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/redo.png"))); // NOI18N
         menuItemRedo.setText("Redo");
+        menuItemRedo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemRedoActionPerformed(evt);
+            }
+        });
         jMenu2.add(menuItemRedo);
 
         menuItemCut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/scissors.png"))); // NOI18N
@@ -185,74 +218,43 @@ public class TextEditorWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // FIXME
     private void menuItemNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemNewActionPerformed
+        if (currentFile != null){ // Missing attribute that checks if it has been changed 
+            int choosenOption = JOptionPane.showConfirmDialog(null, "Do you want to save before closing?", "Wait!" , JOptionPane.YES_NO_OPTION);
+            if (choosenOption == JOptionPane.YES_OPTION){
+                saveFile();
+            }
+        }
+        currentFile = null;
         textArea.setText("");
         setTitle("New file");
     }//GEN-LAST:event_menuItemNewActionPerformed
 
     private void menuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemOpenActionPerformed
-        FileDialog fileDialog = new FileDialog(TextEditorWindow.this, "Open file", FileDialog.LOAD);
-        fileDialog.setVisible(true);
-
-        if (fileDialog.getFile() != null) {
-            fileName = fileDialog.getDirectory() + fileDialog.getFile();
-            setTitle(fileName);
-        }
-        
-        try {
-            if (fileName != null){
-                BufferedReader reader = new BufferedReader(new FileReader(fileName));
-                StringBuilder stringBuilder = new StringBuilder();
-                String line = null;
-
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line + "\n");
-                    textArea.setText(stringBuilder.toString());
-                }
-                reader.close();
-            }
-        }
-        
-        catch (IOException e) {
-            System.out.println("Could not open file succesfully: " + e.getMessage());
-        }
+        openFile();
     }//GEN-LAST:event_menuItemOpenActionPerformed
 
     private void menuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSaveActionPerformed
-       FileDialog fileDialog = new FileDialog(TextEditorWindow.this, "Save file", FileDialog.LOAD);
-       fileDialog.setVisible(true);
-       
-        System.out.println("Trying to save with file name: " + fileName);
-       
-       if (fileDialog.getFile() != null){
-           fileName = fileDialog.getDirectory() + fileDialog.getFile();
-           setTitle(fileName);
-       }
-       
-        try {
-            FileWriter fileWriter = new FileWriter(fileName);
-            fileWriter.write(textArea.getText());
-            setTitle(fileName);
-            fileWriter.close();
-        } 
-        
-        catch (IOException e) {
-            System.out.println("File was not saved succesfully: " + e.getMessage());
-        }
+        saveFile();
+    
     }//GEN-LAST:event_menuItemSaveActionPerformed
 
     private void menuItemCutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCutActionPerformed
+        Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used to cut,copy and paste functions
         String cutString = textArea.getSelectedText();
         StringSelection cutSelection = new StringSelection(cutString);
         clipBoard.setContents(cutSelection, cutSelection);
-        textArea.replaceRange("", textArea.getSelectionStart(), textArea.getSelectionEnd());
+        textArea.replaceSelection("");
     }//GEN-LAST:event_menuItemCutActionPerformed
 
     private void menuItemPasteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemPasteActionPerformed
         try {
+            Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used to cut,copy and paste functions
             Transferable pasteText = clipBoard.getContents(TextEditorWindow.this);
             String sel = (String) pasteText.getTransferData(DataFlavor.stringFlavor); // Do know what this line is for :(
-            textArea.replaceRange(sel, textArea.getSelectionStart(), textArea.getSelectionEnd());
+            //textArea.replaceRange(sel, textArea.getSelectionStart(), textArea.getSelectionEnd());
+            textArea.paste();
         } 
         catch (Exception e) {
             System.out.println("Error while trying to paste text: " + e.getMessage());
@@ -260,11 +262,96 @@ public class TextEditorWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemPasteActionPerformed
 
     private void menuItemCopyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCopyActionPerformed
+        Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used to cut,copy and paste functions
         String copyText = textArea.getSelectedText();
         StringSelection copySelection = new StringSelection(copyText);
         clipBoard.setContents(copySelection, copySelection);
     }//GEN-LAST:event_menuItemCopyActionPerformed
 
+    private void menuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSaveAsActionPerformed
+        saveFileFirstTime();
+    }//GEN-LAST:event_menuItemSaveAsActionPerformed
+
+    private void menuItemUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemUndoActionPerformed
+        if(undoManager.canUndo()){
+            undoManager.undo();
+            System.out.println("Editor log: Trying to UNDO an action");
+        }
+    }//GEN-LAST:event_menuItemUndoActionPerformed
+
+    private void menuItemRedoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemRedoActionPerformed
+        if (undoManager.canRedo()) {
+            undoManager.redo();
+            System.out.println("Editor log: Trying to REDO an action");
+        }
+    }//GEN-LAST:event_menuItemRedoActionPerformed
+
+    public void saveFile(){
+        try {
+            if (currentFile == null){
+                saveFileFirstTime();
+            }
+            else{
+                String fileContent = textArea.getText();
+                fileName = currentFile.getName();
+
+                FileWriter fileWriter = new FileWriter(currentFile);
+                fileWriter.write(fileContent);
+                this.setTitle(windowTitle + " - " + fileName);
+                fileWriter.close();
+
+                System.out.println("Editor log: Succesfully saved the file " + fileName);
+            }
+
+        } 
+        
+        catch (Exception e) {
+        }
+    }
+    
+    public void saveFileFirstTime(){
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save file");
+            fileChooser.showSaveDialog(null);
+
+            currentFile = fileChooser.getSelectedFile();
+            
+            // This is to validate if the save was not cancelled.
+            if (currentFile != null){
+                saveFile(); 
+                
+            }
+
+            
+            System.out.println("Editor log: Succesfully saved for the first time file " + fileName);
+        } catch (Exception e) {
+        }
+    }
+    
+    public void openFile(){
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select a file to open");
+            fileChooser.showOpenDialog(null);
+
+            currentFile = fileChooser.getSelectedFile();
+            if (!currentFile.exists()) {
+                currentFile = null;
+                JOptionPane.showMessageDialog(null, "Failed to open the file" , "Error" , JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Scanner reader = new Scanner(currentFile);
+            String fileContent = "";
+            while (reader.hasNextLine()) {
+                fileContent += reader.nextLine() + "\n";
+            }
+            reader.close();
+            textArea.setText(fileContent);
+        } catch (Exception e) {
+        }
+    }
     
     public void setIcon(){
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png")));
@@ -274,7 +361,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JMenuItem menuItemCopy;
     private javax.swing.JMenuItem menuItemCut;
     private javax.swing.JMenuItem menuItemNew;
@@ -285,6 +372,6 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuItemSaveAs;
     private javax.swing.JMenuItem menuItemUndo;
     private javax.swing.JPanel panelMain;
-    private javax.swing.JTextArea textArea;
+    private javax.swing.JTextPane textArea;
     // End of variables declaration//GEN-END:variables
 }
