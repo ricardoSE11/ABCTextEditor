@@ -20,6 +20,8 @@ import java.util.Formatter;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.undo.UndoManager;
 

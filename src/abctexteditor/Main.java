@@ -5,6 +5,9 @@
  */
 package abctexteditor;
 
+import abctexteditor.SaveClasses.FileSaver;
+import abctexteditor.SaveClasses.FileSaverPDF;
+
 /**
  *
  * @author rshum
@@ -18,6 +21,8 @@ public class Main {
         // TODO code application logic here
         TextEditorWindow textEditorWindow = new TextEditorWindow();
         textEditorWindow.setVisible(true);
+        FileSaver saver = new FileSaverPDF();
+        saver.SaveFile("test");
     }
     
 }
