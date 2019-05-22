@@ -11,14 +11,14 @@ public class JSONFileFormat implements IFileFormat{
     @Override
     public String applyFormat(String fileContent) {
         String formattedText = "";
-        System.out.println("I apply XML format to the text before saving it");
+        System.out.println("I apply JSON format to the text before saving it");
         return formattedText;
     }
 
     @Override
     public String removeFormat(String fileContent) {
         String unformattedText = "";
-        System.out.println("I remove XML format to the text before it is opened");
+        System.out.println("I remove JSON format to the text before it is opened");
         return unformattedText;
     }
 }
