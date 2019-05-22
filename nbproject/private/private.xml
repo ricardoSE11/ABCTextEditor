@@ -4,6 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/TextEditorWindow.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/XMLFileFormat.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/FileFormatter.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/IFileFormat.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/FileFormatFactory.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/FileExtension.java</file>
+            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/JSONFileFormat.java</file>
         </group>
     </open-files>
 </project-private>
