@@ -6,7 +6,7 @@
 package abctexteditor;
 
 import abctexteditor.SaveClasses.FileSaver;
-import abctexteditor.SaveClasses.FileSaverPDF;
+import abctexteditor.Resources.FileSaverPDF;
 
 /**
  *

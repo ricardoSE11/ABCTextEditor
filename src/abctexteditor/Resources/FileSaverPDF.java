@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abctexteditor.SaveClasses;
+package abctexteditor.Resources;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -18,13 +18,12 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
  *
  * @author juanj
  */
-public class FileSaverPDF implements FileSaver{
+public class FileSaverPDF {
     
     public FileSaverPDF() {
     }
     
     
-    @Override
     public boolean SaveFile(String text) {
         try {
             try (PDDocument document = new PDDocument()) {
