@@ -5,22 +5,20 @@
  */
 package abctexteditor;
 
-import java.awt.FileDialog;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Formatter;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoManager;
 
 
@@ -31,19 +29,25 @@ import javax.swing.undo.UndoManager;
 public class TextEditorWindow extends javax.swing.JFrame {
 
     private final String windowTitle = "ABC Text Editor";
+    
     private File currentFile;
     private String fileName; 
+    
     private UndoManager undoManager = new UndoManager();
+    private ChangesDocumentListener documentListener = new ChangesDocumentListener();
+    private StyledDocument document;
     
     public TextEditorWindow() {
         initComponents();
-        this.textArea.getDocument().addUndoableEditListener(undoManager);
-        
-        // UI Related
+        this.document = textArea.getStyledDocument();
+        document.addUndoableEditListener(undoManager);
+        document.addDocumentListener(documentListener);
+        // Set up UI
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.setTitle(windowTitle);
-            setIcon();
+            Image editorIcon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png"));
+            setIcon(editorIcon);
         } 
         catch (Exception e) {
             System.out.println("Error while setting up system look and feel: " + e.getMessage());
@@ -220,7 +224,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
     // FIXME
     private void menuItemNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemNewActionPerformed
-        if (currentFile != null){ // Missing attribute that checks if it has been changed 
+        if (currentFile != null && documentListener.detectedChanges()){ // Missing attribute that checks if it has been changed 
             int choosenOption = JOptionPane.showConfirmDialog(null, "Do you want to save before closing?", "Wait!" , JOptionPane.YES_NO_OPTION);
             if (choosenOption == JOptionPane.YES_OPTION){
                 saveFile();
@@ -275,14 +279,14 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private void menuItemUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemUndoActionPerformed
         if(undoManager.canUndo()){
             undoManager.undo();
-            System.out.println("Editor log: Trying to UNDO an action");
+            //System.out.println("Editor log: Trying to UNDO an action");
         }
     }//GEN-LAST:event_menuItemUndoActionPerformed
 
     private void menuItemRedoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemRedoActionPerformed
         if (undoManager.canRedo()) {
             undoManager.redo();
-            System.out.println("Editor log: Trying to REDO an action");
+            //System.out.println("Editor log: Trying to REDO an action");
         }
     }//GEN-LAST:event_menuItemRedoActionPerformed
 
@@ -353,8 +357,9 @@ public class TextEditorWindow extends javax.swing.JFrame {
         }
     }
     
-    public void setIcon(){
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png")));
+    public void setIcon(Image image){
+        setIconImage(image);
+        //setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png")));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
