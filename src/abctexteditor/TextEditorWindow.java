@@ -21,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
@@ -384,6 +385,12 @@ public class TextEditorWindow extends javax.swing.JFrame {
         AttributeSet aset = sc.addAttribute(oldSet, StyleConstants.Foreground, color);
         this.document.setCharacterAttributes(start, selectedLength, aset, false);
         addColorSetting(color_number, start, end);
+        
+        //trying to make it revert to black color
+        //AttributeSet revert = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.BLACK);
+        //int len = textArea.getDocument().getLength();
+        //this.document.setCharacterAttributes(len, len, revert, false);
+        
     }
     
     private void addColorSetting(int color_number, int start, int end){
