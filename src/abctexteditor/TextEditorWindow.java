@@ -419,10 +419,6 @@ public class TextEditorWindow extends javax.swing.JFrame {
             this.colors.add(new_half_two_colorSetting);
         }
         this.colors.add(new_color_setting);
-        for(ColorSetting colorSetting : this.colors){
-            System.out.println(colorSetting.toString());
-            
-        }
     }
     
     public void saveFile(){
