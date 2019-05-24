@@ -3,9 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< HEAD
             <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Utils/Paragraph.java</file>
             <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Utils/StringHandler.java</file>
             <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/JSONFileFormat.java</file>
+=======
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Files/IFileFormat.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Main.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/ChangesDocumentListener.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Files/FileSaverPDF.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/TextEditorWindow.java</file>
+>>>>>>> 5dca0648cedd19d0249786bd2dbd9a22e7c0870e
         </group>
     </open-files>
 </project-private>

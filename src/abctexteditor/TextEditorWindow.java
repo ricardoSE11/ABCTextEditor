@@ -5,14 +5,14 @@
  */
 package abctexteditor;
 
-import abctexteditor.Files.FileExtension;
-import abctexteditor.Files.FileFormatter;
-import abctexteditor.Utils.Paragraph;
-import abctexteditor.Utils.StringHandler;
+import abctexteditor.Files.ColorSetting;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -20,6 +20,10 @@ import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoManager;
 
@@ -34,18 +38,19 @@ public class TextEditorWindow extends javax.swing.JFrame {
     
     private File currentFile;
     private String fileName; 
-    private FileFormatter fileFormatter;
     
     private UndoManager undoManager = new UndoManager();
     private ChangesDocumentListener documentListener = new ChangesDocumentListener();
     private StyledDocument document;
+    //It will have the text color configuration, sorted by position
+    private ArrayList<ColorSetting> colors;
     
     public TextEditorWindow() {
         initComponents();
+        this.colors = new ArrayList<>();
         this.document = textArea.getStyledDocument();
         document.addUndoableEditListener(undoManager);
         document.addDocumentListener(documentListener);
-        fileFormatter = new FileFormatter();
         // Set up UI
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -72,17 +77,23 @@ public class TextEditorWindow extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         textArea = new javax.swing.JTextPane();
         jMenuBar1 = new javax.swing.JMenuBar();
-        menuFile = new javax.swing.JMenu();
+        jMenu1 = new javax.swing.JMenu();
         menuItemNew = new javax.swing.JMenuItem();
         menuItemOpen = new javax.swing.JMenuItem();
         menuItemSave = new javax.swing.JMenuItem();
         menuItemSaveAs = new javax.swing.JMenuItem();
-        menuEdit = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
         menuItemUndo = new javax.swing.JMenuItem();
         menuItemRedo = new javax.swing.JMenuItem();
         menuItemCut = new javax.swing.JMenuItem();
         menuItemCopy = new javax.swing.JMenuItem();
         menuItemPaste = new javax.swing.JMenuItem();
+        menuItemChangeColor = new javax.swing.JMenu();
+        colorMenuItemBlue = new javax.swing.JMenuItem();
+        colorMenuItemRed = new javax.swing.JMenuItem();
+        colorMenuItemBlack = new javax.swing.JMenuItem();
+        colorMenuItemYellow = new javax.swing.JMenuItem();
+        colorMenuItemGreen = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(400, 200));
@@ -109,7 +120,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        menuFile.setText("File");
+        jMenu1.setText("File");
 
         menuItemNew.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         menuItemNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/file.png"))); // NOI18N
@@ -119,7 +130,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemNewActionPerformed(evt);
             }
         });
-        menuFile.add(menuItemNew);
+        jMenu1.add(menuItemNew);
 
         menuItemOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         menuItemOpen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/folder.png"))); // NOI18N
@@ -129,7 +140,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemOpenActionPerformed(evt);
             }
         });
-        menuFile.add(menuItemOpen);
+        jMenu1.add(menuItemOpen);
 
         menuItemSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         menuItemSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/save.png"))); // NOI18N
@@ -139,7 +150,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemSaveActionPerformed(evt);
             }
         });
-        menuFile.add(menuItemSave);
+        jMenu1.add(menuItemSave);
 
         menuItemSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/diskette.png"))); // NOI18N
         menuItemSaveAs.setText("Save as");
@@ -149,11 +160,11 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemSaveAsActionPerformed(evt);
             }
         });
-        menuFile.add(menuItemSaveAs);
+        jMenu1.add(menuItemSaveAs);
 
-        jMenuBar1.add(menuFile);
+        jMenuBar1.add(jMenu1);
 
-        menuEdit.setText("Edit");
+        jMenu2.setText("Edit");
 
         menuItemUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
         menuItemUndo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/undo.png"))); // NOI18N
@@ -163,7 +174,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemUndoActionPerformed(evt);
             }
         });
-        menuEdit.add(menuItemUndo);
+        jMenu2.add(menuItemUndo);
 
         menuItemRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
         menuItemRedo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/redo.png"))); // NOI18N
@@ -173,7 +184,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemRedoActionPerformed(evt);
             }
         });
-        menuEdit.add(menuItemRedo);
+        jMenu2.add(menuItemRedo);
 
         menuItemCut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/scissors.png"))); // NOI18N
         menuItemCut.setText("Cut");
@@ -182,7 +193,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemCutActionPerformed(evt);
             }
         });
-        menuEdit.add(menuItemCut);
+        jMenu2.add(menuItemCut);
 
         menuItemCopy.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/copy.png"))); // NOI18N
         menuItemCopy.setText("Copy");
@@ -191,7 +202,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemCopyActionPerformed(evt);
             }
         });
-        menuEdit.add(menuItemCopy);
+        jMenu2.add(menuItemCopy);
 
         menuItemPaste.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/paste-as-text.png"))); // NOI18N
         menuItemPaste.setText("Paste");
@@ -200,9 +211,59 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemPasteActionPerformed(evt);
             }
         });
-        menuEdit.add(menuItemPaste);
+        jMenu2.add(menuItemPaste);
 
-        jMenuBar1.add(menuEdit);
+        menuItemChangeColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/cores.jpg"))); // NOI18N
+        menuItemChangeColor.setText("Change Color");
+
+        colorMenuItemBlue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/blue.jpg"))); // NOI18N
+        colorMenuItemBlue.setText("Blue");
+        colorMenuItemBlue.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemBlueActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemBlue);
+
+        colorMenuItemRed.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/red.jpg"))); // NOI18N
+        colorMenuItemRed.setText("Red");
+        colorMenuItemRed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemRedActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemRed);
+
+        colorMenuItemBlack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/black.jpg"))); // NOI18N
+        colorMenuItemBlack.setText("Black");
+        colorMenuItemBlack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemBlackActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemBlack);
+
+        colorMenuItemYellow.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/yellow.jpg"))); // NOI18N
+        colorMenuItemYellow.setText("Yellow");
+        colorMenuItemYellow.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemYellowActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemYellow);
+
+        colorMenuItemGreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/green.jpg"))); // NOI18N
+        colorMenuItemGreen.setText("Green");
+        colorMenuItemGreen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemGreenActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemGreen);
+
+        jMenu2.add(menuItemChangeColor);
+
+        jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
 
@@ -258,6 +319,10 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
     private void menuItemPasteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemPasteActionPerformed
         try {
+            Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used to cut,copy and paste functions
+            Transferable pasteText = clipBoard.getContents(TextEditorWindow.this);
+            String sel = (String) pasteText.getTransferData(DataFlavor.stringFlavor); // Do know what this line is for :(
+            //textArea.replaceRange(sel, textArea.getSelectionStart(), textArea.getSelectionEnd());
             textArea.paste();
         } 
         catch (Exception e) {
@@ -290,6 +355,76 @@ public class TextEditorWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_menuItemRedoActionPerformed
 
+    private void colorMenuItemBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlueActionPerformed
+        changeColorOfSelectedText(Color.BLUE, 1);
+    }//GEN-LAST:event_colorMenuItemBlueActionPerformed
+
+    private void colorMenuItemRedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemRedActionPerformed
+        changeColorOfSelectedText(Color.RED, 2);
+    }//GEN-LAST:event_colorMenuItemRedActionPerformed
+
+    private void colorMenuItemBlackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlackActionPerformed
+        changeColorOfSelectedText(Color.BLACK, 3);
+    }//GEN-LAST:event_colorMenuItemBlackActionPerformed
+
+    private void colorMenuItemYellowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemYellowActionPerformed
+        changeColorOfSelectedText(Color.YELLOW, 4);
+    }//GEN-LAST:event_colorMenuItemYellowActionPerformed
+
+    private void colorMenuItemGreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemGreenActionPerformed
+        changeColorOfSelectedText(Color.GREEN, 5);
+    }//GEN-LAST:event_colorMenuItemGreenActionPerformed
+
+    private void changeColorOfSelectedText(Color color, int color_number)
+    {
+        int start = textArea.getSelectionStart();
+        int end = textArea.getSelectionEnd();
+        int selectedLength = end - start;
+        AttributeSet oldSet = this.document.getCharacterElement(end-1).getAttributes();
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(oldSet, StyleConstants.Foreground, color);
+        this.document.setCharacterAttributes(start, selectedLength, aset, false);
+        addColorSetting(color_number, start, end);
+        
+        //trying to make it revert to black color
+        //AttributeSet revert = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.BLACK);
+        //int len = textArea.getDocument().getLength();
+        //this.document.setCharacterAttributes(len, len, revert, false);
+        
+    }
+    
+    private void addColorSetting(int color_number, int start, int end){
+        ColorSetting new_color_setting = new ColorSetting(color_number, start, end);
+        ColorSetting new_half_two_colorSetting = null;
+        for(ColorSetting current_colorSetting: this.colors){
+            int current_start = current_colorSetting.start;
+            int current_end = current_colorSetting.end;
+            //the currentColorSetting is going to be overwriten
+            if(start < current_start && end > current_end){
+                this.colors.remove(current_colorSetting);
+            }else if(start < current_start && end > current_start && end < current_end){
+                current_colorSetting.start = end + 1;
+            }else if(start > current_start && start < current_end && end > current_end){
+                current_colorSetting.end = start - 1;
+                //the new colorSetting is between the current_ColorSetting
+                //it is necessary split it in two
+            }else if(start > current_start && end < current_end){
+                int new_half_one_end = start - 1;
+                int new_half_two_start = end + 1;
+                current_colorSetting.end = new_half_one_end;
+                new_half_two_colorSetting = new ColorSetting(current_colorSetting.color,  new_half_two_start, current_end);
+            }
+        }
+        if(new_half_two_colorSetting != null){
+            this.colors.add(new_half_two_colorSetting);
+        }
+        this.colors.add(new_color_setting);
+        for(ColorSetting colorSetting : this.colors){
+            System.out.println(colorSetting.toString());
+            
+        }
+    }
+    
     public void saveFile(){
         try {
             if (currentFile == null){
@@ -298,13 +433,9 @@ public class TextEditorWindow extends javax.swing.JFrame {
             else{
                 String fileContent = textArea.getText();
                 fileName = currentFile.getName();
-  
-                String fileExtension = getFileExtension(fileName).toUpperCase();
-                FileExtension extension = FileExtension.valueOf(fileExtension);
-                String formattedText = fileFormatter.formatFile(fileContent, extension);
-                
+
                 FileWriter fileWriter = new FileWriter(currentFile);
-                fileWriter.write(formattedText);
+                fileWriter.write(fileContent);
                 this.setTitle(windowTitle + " - " + fileName);
                 fileWriter.close();
 
@@ -355,28 +486,8 @@ public class TextEditorWindow extends javax.swing.JFrame {
             while (reader.hasNextLine()) {
                 fileContent += reader.nextLine() + "\n";
             }
-            reader.close();            
-            
-//            ArrayList<Paragraph> ps = StringHandler.getParagraphs(fileContent);
-//            for (int i = 0; i < ps.size(); i++) {
-//                System.out.println("P# " + i);
-//                System.out.println(ps.get(i).getText());
-//            }
-            
-            fileName = currentFile.getName();
-            String fileExtension = getFileExtension(fileName).toUpperCase();
-            
-            FileExtension extension = FileExtension.valueOf(fileExtension);
-            
-            String unformattedText = fileFormatter.unformatFile(fileContent, extension);
-            //System.out.println("FT: " + formattedText);
-            
-            
-            textArea.setText(unformattedText);
-            this.setTitle(windowTitle + " - " + fileName);
-            
-
-            
+            reader.close();
+            textArea.setText(fileContent);
         } catch (Exception e) {
         }
     }
@@ -386,19 +497,17 @@ public class TextEditorWindow extends javax.swing.JFrame {
         //setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png")));
     }
 
-    public String getFileExtension(String filename){
-        String fileExtension = "";
-        int dotIndex = filename.lastIndexOf(".");
-        if (dotIndex > 0){
-            fileExtension = filename.substring(dotIndex + 1);
-        }
-        return fileExtension;
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem colorMenuItemBlack;
+    private javax.swing.JMenuItem colorMenuItemBlue;
+    private javax.swing.JMenuItem colorMenuItemGreen;
+    private javax.swing.JMenuItem colorMenuItemRed;
+    private javax.swing.JMenuItem colorMenuItemYellow;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JMenu menuEdit;
-    private javax.swing.JMenu menuFile;
+    private javax.swing.JMenu menuItemChangeColor;
     private javax.swing.JMenuItem menuItemCopy;
     private javax.swing.JMenuItem menuItemCut;
     private javax.swing.JMenuItem menuItemNew;
