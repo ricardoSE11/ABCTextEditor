@@ -21,7 +21,7 @@ public class JSONFileFormat implements IFileFormat{
         for (int i = 0 ; i < paragraphs.size() ; i++){
             formattedText += paragraphs.get(i).getText();
         }
-        formattedText += "}";
+        formattedText += "\n" + "}";
         return formattedText;
     }
 
@@ -29,7 +29,7 @@ public class JSONFileFormat implements IFileFormat{
     public String removeFormat(String fileContent) {
         String unformattedText = "";
         System.out.println("I remove JSON format to the text before it is opened");
-        return unformattedText;
+        return fileContent;
     }
     
     /* Method that gets a Paragraph and return its lines modified as specified in the format
@@ -45,12 +45,13 @@ public class JSONFileFormat implements IFileFormat{
             }
             
             if (i == paragraph.getLines().size() - 1){
-                String lastLine = paragraph.getLines().get(i) + "\"" + "]" ;
+                String lastLine = paragraph.getLines().get(i).concat("\"")  + "\n" + "]" ;
                 if (!isLastArray){
                     lastLine += "," + "\n";
                 }
                 paragraph.getLines().remove(i);
-                paragraph.getLines().add(i, lastLine);
+                paragraph.addLine(lastLine);
+                //paragraph.getLines().add(i, lastLine);
             }
         }
     }
