@@ -1,11 +1,9 @@
 package abctexteditor.Files;
 
 import com.itextpdf.text.Chapter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
  
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
@@ -28,7 +26,7 @@ public class FileSaverPDF implements IFileFormat{
     
     @Override
     public String applyFormat(String fileContent) {
-      Font blueFont = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new CMYKColor(255, 0, 0, 0));
+        Font blueFont = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new CMYKColor(255, 0, 0, 0));
         Font redFont = FontFactory.getFont(FontFactory.COURIER, 12, Font.BOLD, new CMYKColor(0, 255, 0, 0));
         Font yellowFont = FontFactory.getFont(FontFactory.COURIER, 14, Font.BOLD, new CMYKColor(0, 0, 255, 0));
         Document document = new Document();
@@ -36,9 +34,9 @@ public class FileSaverPDF implements IFileFormat{
         {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("StylingExample.pdf"));
             document.open();
-            //document.add(new Paragraph("Styling Example"));
+            document.add(new Paragraph(fileContent));
 
-            //Paragraph with color and font styles
+            /*//Paragraph with color and font styles
             Paragraph paragraphOne = new Paragraph("Some colored paragraph text", redFont);
             document.add(paragraphOne);
 
@@ -53,7 +51,7 @@ public class FileSaverPDF implements IFileFormat{
             Paragraph sectionContent = new Paragraph("Section Text content", blueFont);
             section1.add(sectionContent);
 
-            document.add(chapter1);
+            document.add(chapter1);*/            
 
             document.close();
             writer.close();
