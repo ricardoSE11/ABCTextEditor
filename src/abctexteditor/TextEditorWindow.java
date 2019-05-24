@@ -5,6 +5,7 @@
  */
 package abctexteditor;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -18,6 +19,10 @@ import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoManager;
 
@@ -79,6 +84,12 @@ public class TextEditorWindow extends javax.swing.JFrame {
         menuItemCut = new javax.swing.JMenuItem();
         menuItemCopy = new javax.swing.JMenuItem();
         menuItemPaste = new javax.swing.JMenuItem();
+        menuItemChangeColor = new javax.swing.JMenu();
+        colorMenuItemBlue = new javax.swing.JMenuItem();
+        colorMenuItemRed = new javax.swing.JMenuItem();
+        colorMenuItemBlack = new javax.swing.JMenuItem();
+        colorMenuItemYellow = new javax.swing.JMenuItem();
+        colorMenuItemGreen = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocation(new java.awt.Point(400, 200));
@@ -198,6 +209,56 @@ public class TextEditorWindow extends javax.swing.JFrame {
         });
         jMenu2.add(menuItemPaste);
 
+        menuItemChangeColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/cores.jpg"))); // NOI18N
+        menuItemChangeColor.setText("Change Color");
+
+        colorMenuItemBlue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/blue.jpg"))); // NOI18N
+        colorMenuItemBlue.setText("Blue");
+        colorMenuItemBlue.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemBlueActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemBlue);
+
+        colorMenuItemRed.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/red.jpg"))); // NOI18N
+        colorMenuItemRed.setText("Red");
+        colorMenuItemRed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemRedActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemRed);
+
+        colorMenuItemBlack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/black.jpg"))); // NOI18N
+        colorMenuItemBlack.setText("Black");
+        colorMenuItemBlack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemBlackActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemBlack);
+
+        colorMenuItemYellow.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/yellow.jpg"))); // NOI18N
+        colorMenuItemYellow.setText("Yellow");
+        colorMenuItemYellow.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemYellowActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemYellow);
+
+        colorMenuItemGreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/green.jpg"))); // NOI18N
+        colorMenuItemGreen.setText("Green");
+        colorMenuItemGreen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorMenuItemGreenActionPerformed(evt);
+            }
+        });
+        menuItemChangeColor.add(colorMenuItemGreen);
+
+        jMenu2.add(menuItemChangeColor);
+
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -290,6 +351,37 @@ public class TextEditorWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_menuItemRedoActionPerformed
 
+    private void colorMenuItemBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlueActionPerformed
+        changeColorOfSelectedText(Color.BLUE);
+    }//GEN-LAST:event_colorMenuItemBlueActionPerformed
+
+    private void colorMenuItemRedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemRedActionPerformed
+        changeColorOfSelectedText(Color.RED);
+    }//GEN-LAST:event_colorMenuItemRedActionPerformed
+
+    private void colorMenuItemBlackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlackActionPerformed
+        changeColorOfSelectedText(Color.BLACK);
+    }//GEN-LAST:event_colorMenuItemBlackActionPerformed
+
+    private void colorMenuItemYellowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemYellowActionPerformed
+        changeColorOfSelectedText(Color.YELLOW);
+    }//GEN-LAST:event_colorMenuItemYellowActionPerformed
+
+    private void colorMenuItemGreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemGreenActionPerformed
+        changeColorOfSelectedText(Color.GREEN);
+    }//GEN-LAST:event_colorMenuItemGreenActionPerformed
+
+    private void changeColorOfSelectedText(Color color)
+    {
+        int start = textArea.getSelectionStart();
+        int end = textArea.getSelectionEnd();
+        int selectedLength = end - start;
+        AttributeSet oldSet = this.document.getCharacterElement(end-1).getAttributes();
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(oldSet, StyleConstants.Foreground, color);
+        this.document.setCharacterAttributes(start, selectedLength, aset, true);
+    }
+    
     public void saveFile(){
         try {
             if (currentFile == null){
@@ -363,10 +455,16 @@ public class TextEditorWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem colorMenuItemBlack;
+    private javax.swing.JMenuItem colorMenuItemBlue;
+    private javax.swing.JMenuItem colorMenuItemGreen;
+    private javax.swing.JMenuItem colorMenuItemRed;
+    private javax.swing.JMenuItem colorMenuItemYellow;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JMenu menuItemChangeColor;
     private javax.swing.JMenuItem menuItemCopy;
     private javax.swing.JMenuItem menuItemCut;
     private javax.swing.JMenuItem menuItemNew;
