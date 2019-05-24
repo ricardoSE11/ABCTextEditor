@@ -25,13 +25,13 @@ public class ChangesDocumentListener implements DocumentListener {
     
     @Override
     public void insertUpdate(DocumentEvent de) {
-        System.out.println("Editor log: Document listener detected new characters");
+        //System.out.println("Editor log: Document listener detected new characters");
         this.detectedChanges = true;
     }
 
     @Override
     public void removeUpdate(DocumentEvent de) {
-        System.out.println("Editor log: Document listener detected remove of characters");
+        //System.out.println("Editor log: Document listener detected remove of characters");
         this.detectedChanges = true;
     }
 
