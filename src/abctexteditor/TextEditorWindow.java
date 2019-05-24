@@ -5,14 +5,13 @@
  */
 package abctexteditor;
 
+import abctexteditor.Files.FileExtension;
+import abctexteditor.Files.FileFormatter;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
@@ -32,6 +31,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
     
     private File currentFile;
     private String fileName; 
+    private FileFormatter fileFormatter;
     
     private UndoManager undoManager = new UndoManager();
     private ChangesDocumentListener documentListener = new ChangesDocumentListener();
@@ -42,6 +42,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
         this.document = textArea.getStyledDocument();
         document.addUndoableEditListener(undoManager);
         document.addDocumentListener(documentListener);
+        fileFormatter = new FileFormatter();
         // Set up UI
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -68,12 +69,12 @@ public class TextEditorWindow extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         textArea = new javax.swing.JTextPane();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        menuFile = new javax.swing.JMenu();
         menuItemNew = new javax.swing.JMenuItem();
         menuItemOpen = new javax.swing.JMenuItem();
         menuItemSave = new javax.swing.JMenuItem();
         menuItemSaveAs = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        menuEdit = new javax.swing.JMenu();
         menuItemUndo = new javax.swing.JMenuItem();
         menuItemRedo = new javax.swing.JMenuItem();
         menuItemCut = new javax.swing.JMenuItem();
@@ -105,7 +106,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jMenu1.setText("File");
+        menuFile.setText("File");
 
         menuItemNew.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         menuItemNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/file.png"))); // NOI18N
@@ -115,7 +116,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemNewActionPerformed(evt);
             }
         });
-        jMenu1.add(menuItemNew);
+        menuFile.add(menuItemNew);
 
         menuItemOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         menuItemOpen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/folder.png"))); // NOI18N
@@ -125,7 +126,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemOpenActionPerformed(evt);
             }
         });
-        jMenu1.add(menuItemOpen);
+        menuFile.add(menuItemOpen);
 
         menuItemSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         menuItemSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/save.png"))); // NOI18N
@@ -135,7 +136,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemSaveActionPerformed(evt);
             }
         });
-        jMenu1.add(menuItemSave);
+        menuFile.add(menuItemSave);
 
         menuItemSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/diskette.png"))); // NOI18N
         menuItemSaveAs.setText("Save as");
@@ -145,11 +146,11 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemSaveAsActionPerformed(evt);
             }
         });
-        jMenu1.add(menuItemSaveAs);
+        menuFile.add(menuItemSaveAs);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(menuFile);
 
-        jMenu2.setText("Edit");
+        menuEdit.setText("Edit");
 
         menuItemUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
         menuItemUndo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/undo.png"))); // NOI18N
@@ -159,7 +160,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemUndoActionPerformed(evt);
             }
         });
-        jMenu2.add(menuItemUndo);
+        menuEdit.add(menuItemUndo);
 
         menuItemRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
         menuItemRedo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/redo.png"))); // NOI18N
@@ -169,7 +170,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemRedoActionPerformed(evt);
             }
         });
-        jMenu2.add(menuItemRedo);
+        menuEdit.add(menuItemRedo);
 
         menuItemCut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/scissors.png"))); // NOI18N
         menuItemCut.setText("Cut");
@@ -178,7 +179,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemCutActionPerformed(evt);
             }
         });
-        jMenu2.add(menuItemCut);
+        menuEdit.add(menuItemCut);
 
         menuItemCopy.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/copy.png"))); // NOI18N
         menuItemCopy.setText("Copy");
@@ -187,7 +188,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemCopyActionPerformed(evt);
             }
         });
-        jMenu2.add(menuItemCopy);
+        menuEdit.add(menuItemCopy);
 
         menuItemPaste.setIcon(new javax.swing.ImageIcon(getClass().getResource("/abctexteditor/Resources/paste-as-text.png"))); // NOI18N
         menuItemPaste.setText("Paste");
@@ -196,9 +197,9 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 menuItemPasteActionPerformed(evt);
             }
         });
-        jMenu2.add(menuItemPaste);
+        menuEdit.add(menuItemPaste);
 
-        jMenuBar1.add(jMenu2);
+        jMenuBar1.add(menuEdit);
 
         setJMenuBar(jMenuBar1);
 
@@ -254,10 +255,6 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
     private void menuItemPasteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemPasteActionPerformed
         try {
-            Clipboard clipBoard = getToolkit().getSystemClipboard(); // Used to cut,copy and paste functions
-            Transferable pasteText = clipBoard.getContents(TextEditorWindow.this);
-            String sel = (String) pasteText.getTransferData(DataFlavor.stringFlavor); // Do know what this line is for :(
-            //textArea.replaceRange(sel, textArea.getSelectionStart(), textArea.getSelectionEnd());
             textArea.paste();
         } 
         catch (Exception e) {
@@ -351,8 +348,24 @@ public class TextEditorWindow extends javax.swing.JFrame {
             while (reader.hasNextLine()) {
                 fileContent += reader.nextLine() + "\n";
             }
-            reader.close();
-            textArea.setText(fileContent);
+            reader.close();            
+            
+            fileName = currentFile.getName();
+            String fileExtension = getFileExtension(fileName).toUpperCase();
+            
+            FileExtension extension = FileExtension.valueOf(fileExtension);
+            
+            String formattedText = fileFormatter.formatFile(fileContent, extension);
+            
+            // Styles section
+            //Style redFont = textArea.add
+            // End of styles section
+            
+            textArea.setText(formattedText);
+            this.setTitle(windowTitle + " - " + fileName);
+            
+
+            
         } catch (Exception e) {
         }
     }
@@ -362,11 +375,19 @@ public class TextEditorWindow extends javax.swing.JFrame {
         //setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resources/abc.png")));
     }
 
+    public String getFileExtension(String filename){
+        String fileExtension = "";
+        int dotIndex = filename.lastIndexOf(".");
+        if (dotIndex > 0){
+            fileExtension = filename.substring(dotIndex + 1);
+        }
+        return fileExtension;
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JMenu menuEdit;
+    private javax.swing.JMenu menuFile;
     private javax.swing.JMenuItem menuItemCopy;
     private javax.swing.JMenuItem menuItemCut;
     private javax.swing.JMenuItem menuItemNew;

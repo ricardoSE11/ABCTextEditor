@@ -15,7 +15,11 @@ class FileFormatFactory {
                 choosenFormat = new XMLFileFormat();
             }
             
+            case JSON:{
+                choosenFormat = new JSONFileFormat();
+            }
         }
+        
         
         return choosenFormat;
     }
