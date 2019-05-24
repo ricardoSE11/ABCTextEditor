@@ -1,4 +1,3 @@
-
 package abctexteditor.Files;
 
 import abctexteditor.Utils.Paragraph;
@@ -35,7 +34,7 @@ public class JSONFileFormat implements IFileFormat{
             unformattedText += paragraphs.get(i).getText();
         }
         System.out.println("I remove JSON format to the text before it is opened");
-        return fileContent;
+        return unformattedText;
     }
     
     
@@ -44,7 +43,6 @@ public class JSONFileFormat implements IFileFormat{
     /* Method that gets a Paragraph and return its lines modified as specified in the format
      * -> paragraph.text ... ["paragraph.text"]
      */
-<<<<<<< HEAD
     public void paragraphToJSONArray(Paragraph paragraph , int paragraphID , boolean isLastParagraph){
         if (paragraph.getLines().size() == 1){
             simpleParagraphToJSONArray(paragraph, paragraphID, isLastParagraph);
@@ -68,25 +66,6 @@ public class JSONFileFormat implements IFileFormat{
                     paragraph.getLines().remove(i);
                     paragraph.addLine(lastLine);
                 }
-=======
-    public void paragraphToJSONArray(Paragraph paragraph , int paragraphID , boolean isLastArray){
-        for (int i = 0 ; i < paragraph.getLines().size() ; i++){
-            if (i == 0){
-                String paragraphIdentifier = "\"" + "p" + paragraphID + "\"" + ":";
-                String lineOne = paragraphIdentifier + "[" + "\"" + paragraph.getLines().get(i);
-                paragraph.getLines().remove(i);
-                paragraph.getLines().add(i, lineOne);
-            }
-            
-            if (i == paragraph.getLines().size() - 1){
-                String lastLine = paragraph.getLines().get(i).concat("\"")  + "\n" + "]" ;
-                if (!isLastArray){
-                    lastLine += "," + "\n";
-                }
-                paragraph.getLines().remove(i);
-                paragraph.addLine(lastLine);
-                //paragraph.getLines().add(i, lastLine);
->>>>>>> 5dca0648cedd19d0249786bd2dbd9a22e7c0870e
             }
         }
 
