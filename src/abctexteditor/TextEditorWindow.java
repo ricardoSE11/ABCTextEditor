@@ -16,6 +16,8 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -46,6 +48,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private ArrayList<ColorSetting> colors;
     private int lenght_of_document_before_change;
     private int lenght_of_document_after_change;
+    private int previous_caretPosition;
     private int caretPosition;
     
     public TextEditorWindow() {
@@ -392,11 +395,14 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private void textAreaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyTyped
         this.caretPosition = textArea.getCaretPosition();
         this.lenght_of_document_after_change = textArea.getDocument().getLength();
-        updateColorSettings(this.lenght_of_document_before_change, this.lenght_of_document_after_change,
+        if(this.caretPosition != this.previous_caretPosition){
+            updateColorSettings(this.lenght_of_document_before_change, this.lenght_of_document_after_change,
                 this.caretPosition);
+        }
     }//GEN-LAST:event_textAreaKeyTyped
 
     private void textAreaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyPressed
+        this.previous_caretPosition = textArea.getCaretPosition();
         this.lenght_of_document_before_change = textArea.getDocument().getLength();
     }//GEN-LAST:event_textAreaKeyPressed
 
@@ -406,44 +412,42 @@ public class TextEditorWindow extends javax.swing.JFrame {
 
     private void updateColorSettings(int length_before, int lenght_after, int caretPos){
         int toAdd = 1;
+        int previous_caretPos = caretPos;
         boolean isSubstract = false;
         if(length_before > lenght_after){
             toAdd = length_before - lenght_after;
             isSubstract = true;
+            previous_caretPos = caretPos + toAdd;
         }
-        int previous_caretPos = caretPos + toAdd;
         ArrayList<ColorSetting> to_delete = new ArrayList<>();
         for(ColorSetting current_colorSetting : this.colors){
             int current_start = current_colorSetting.start;
             int current_end = current_colorSetting.end;
-            
-            //the colored word was deleted
+            System.out.println("Entra");
+            if(current_start > previous_caretPos){
+                System.out.println("Entra3");
+                if(isSubstract && toAdd == 1){
+                    current_colorSetting.start -= toAdd;
+                    current_colorSetting.end -= toAdd;
+                }else{
+                    System.out.println("Entra4");
+                    current_colorSetting.start += toAdd;
+                    current_colorSetting.end += toAdd;
+                }
+            }
             if(current_start > caretPos && current_end < previous_caretPos){
                 to_delete.add(current_colorSetting);
             }else if(current_start > caretPos && previous_caretPos > current_start && previous_caretPos < current_end){
-                current_colorSetting.start = previous_caretPos + 1;//should I add or substract one?
+                current_colorSetting.start = previous_caretPos;//should I add or substract one?
             }else if(current_start < caretPos && previous_caretPos > current_start && previous_caretPos < current_end){
                 current_colorSetting.end =  current_start + ( caretPos - current_start) + (current_end - previous_caretPos);
             }else if(current_start < caretPos && caretPos < current_end && current_end < previous_caretPos){
-                current_colorSetting.end = caretPos - 1;////should I add or substract one?
-            }else{
-                if(caretPos < current_start){
-                    if(isSubstract){
-                        current_colorSetting.start = current_colorSetting.start - toAdd;
-                        current_colorSetting.end = current_colorSetting.end - toAdd;
-                    }else{
-                        current_colorSetting.start = current_colorSetting.start + toAdd;
-                        current_colorSetting.end = current_colorSetting.end + toAdd;
-                    }
-                }
+                current_colorSetting.end = caretPos;////should I add or substract one?
             }
+            
         }
         for(ColorSetting current_colorSetting : to_delete){
             this.colors.remove(current_colorSetting);
-        }
-        
-        for(ColorSetting current_colorSetting : this.colors){
-            System.out.println(current_colorSetting.toString());
         }
     }
     
@@ -468,29 +472,126 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private void addColorSetting(int color_number, int start, int end){
         ColorSetting new_color_setting = new ColorSetting(color_number, start, end);
         ColorSetting new_half_two_colorSetting = null;
+        ArrayList<ColorSetting> to_delete = new ArrayList<>();
         for(ColorSetting current_colorSetting: this.colors){
             int current_start = current_colorSetting.start;
             int current_end = current_colorSetting.end;
-            //the currentColorSetting is going to be overwriten
-            if(start < current_start && end > current_end){
-                this.colors.remove(current_colorSetting);
-            }else if(start < current_start && end > current_start && end < current_end){
-                current_colorSetting.start = end + 1;
-            }else if(start > current_start && start < current_end && end > current_end){
-                current_colorSetting.end = start - 1;
-                //the new colorSetting is between the current_ColorSetting
-                //it is necessary split it in two
-            }else if(start > current_start && end < current_end){
-                int new_half_one_end = start - 1;
-                int new_half_two_start = end + 1;
-                current_colorSetting.end = new_half_one_end;
-                new_half_two_colorSetting = new ColorSetting(current_colorSetting.color,  new_half_two_start, current_end);
+            if(current_end > start){
+                //the currentColorSetting is going to be overwriten
+                if(start <= current_start && end >= current_end){
+                    to_delete.add(current_colorSetting);
+                }else if(start < current_start && end > current_start && end < current_end){
+                    current_colorSetting.start = end + 1;
+                }else if(start > current_start && start < current_end && end > current_end){
+                    current_colorSetting.end = start - 1;
+                    //the new colorSetting is between the current_ColorSetting
+                    //it is necessary split it in two
+                }else if(start > current_start && end < current_end){
+                    int new_half_one_end = start - 1;
+                    int new_half_two_start = end + 1;
+                    current_colorSetting.end = new_half_one_end;
+                    new_half_two_colorSetting = new ColorSetting(current_colorSetting.color,  new_half_two_start, current_end);
+                }
             }
+        }
+        for(ColorSetting current_colorSetting : to_delete){
+            this.colors.remove(current_colorSetting);
         }
         if(new_half_two_colorSetting != null){
             this.colors.add(new_half_two_colorSetting);
         }
+        System.out.println(this.colors.size());
         this.colors.add(new_color_setting);
+        System.out.println(this.colors.size());
+    }
+    
+    public String getColoredText(){
+        String text = textArea.getText();
+        this.colors.sort(Comparator.comparing(ColorSetting::getStart));
+        for(ColorSetting c : this.colors){
+            System.out.println(c.toString());
+        }
+        //Collections.reverse(this.colors);
+        String result = "";
+        if(this.colors.size() > 0){
+            int counter = 0;
+            ColorSetting current = this.colors.get(counter);
+            boolean hasNext = true;
+            int textCounter = 0;
+            for(char i: text.toCharArray()){
+                if(hasNext){
+                    if(textCounter == current.start){
+                        switch(current.color){
+                            case 1:{
+                                result += "((";
+                                break;
+                            }
+                            case 2:{
+                                result += "(*";
+                                break;
+                            }
+                            case 3:{
+                                result += "(+";
+                                break;
+                            }
+                            case 4:{
+                                result += "(-";
+                                break;
+                            }
+
+                            case 5:{
+                                result += "(/";
+                                break;
+                            }   
+                        }
+                        result += i;
+                        textCounter += 1;
+                    }else if( textCounter == current.end){
+                        switch(current.color){
+                            case 1:{
+                                result += i + "))";
+                                break;
+                            }
+                            case 2:{
+                                result += i + "*)";
+                                break;
+                            }
+                            case 3:{
+                                result += i + "+)";
+                                break;
+                            }
+                            case 4:{
+                                result += i + "-)";
+                                break;
+                            }
+
+                            case 5:{
+                                result += i + "/)";
+                                break;
+                            }   
+                        }
+                        textCounter += 1;
+                        
+                        if(this.colors.size() > (counter + 1)){
+                            counter += 1;
+                            current = this.colors.get(counter);
+                        }else{
+                            hasNext = false;
+                        }
+                    }else{
+                        textCounter += 1;
+                        result += i;
+                    }
+                    
+                    
+                }else{
+                    result += i;
+                }
+                
+            }
+        }
+        System.out.println(result);
+        return result;
     }
     
     public void saveFile(){
@@ -499,6 +600,7 @@ public class TextEditorWindow extends javax.swing.JFrame {
                 saveFileFirstTime();
             }
             else{
+                getColoredText();
                 String fileContent = textArea.getText();
                 fileName = currentFile.getName();
 
