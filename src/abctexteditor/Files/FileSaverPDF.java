@@ -1,19 +1,24 @@
 package abctexteditor.Files;
 
+import com.itextpdf.text.Chapter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+ 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Section;
+import com.itextpdf.text.pdf.CMYKColor;
+import com.itextpdf.text.pdf.PdfWriter;
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-
 
 /**
  *
@@ -21,40 +26,48 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
  */
 public class FileSaverPDF implements IFileFormat{
     
-    public FileSaverPDF() {
-    }
-    
-    
-    public boolean SaveFile(String text) {
-        try {
-            try (PDDocument document = new PDDocument()) {
-                PDPage page = new PDPage();
-                document.addPage(page);
-                
-                PDPageContentStream contentStream = new PDPageContentStream(document, page);
-                
-                contentStream.setFont(PDType1Font.COURIER, 12);
-                contentStream.beginText();
-                contentStream.showText("Hello World");
-                contentStream.endText();
-                contentStream.close();
-                
-                document.save("pdfBoxHelloWorld.pdf");
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(FileSaverPDF.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return true;
-    }
-
     @Override
     public String applyFormat(String fileContent) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+      Font blueFont = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new CMYKColor(255, 0, 0, 0));
+        Font redFont = FontFactory.getFont(FontFactory.COURIER, 12, Font.BOLD, new CMYKColor(0, 255, 0, 0));
+        Font yellowFont = FontFactory.getFont(FontFactory.COURIER, 14, Font.BOLD, new CMYKColor(0, 0, 255, 0));
+        Document document = new Document();
+        try
+        {
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("StylingExample.pdf"));
+            document.open();
+            //document.add(new Paragraph("Styling Example"));
+
+            //Paragraph with color and font styles
+            Paragraph paragraphOne = new Paragraph("Some colored paragraph text", redFont);
+            document.add(paragraphOne);
+
+            //Create chapter and sections
+            Paragraph chapterTitle = new Paragraph("Chapter Title", yellowFont);
+            Chapter chapter1 = new Chapter(chapterTitle, 1);
+            chapter1.setNumberDepth(0);
+
+            Paragraph sectionTitle = new Paragraph("Section Title", redFont);
+            Section section1 = chapter1.addSection(sectionTitle);
+
+            Paragraph sectionContent = new Paragraph("Section Text content", blueFont);
+            section1.add(sectionContent);
+
+            document.add(chapter1);
+
+            document.close();
+            writer.close();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+      return "";
     }
 
     @Override
     public String removeFormat(String fileContent) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
     
 }
