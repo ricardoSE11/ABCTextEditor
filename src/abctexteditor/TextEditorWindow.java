@@ -5,6 +5,7 @@
  */
 package abctexteditor;
 
+import abctexteditor.Files.ColorSetting;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -13,14 +14,13 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
@@ -41,9 +41,12 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private UndoManager undoManager = new UndoManager();
     private ChangesDocumentListener documentListener = new ChangesDocumentListener();
     private StyledDocument document;
+    //It will have the text color configuration, sorted by position
+    private ArrayList<ColorSetting> colors;
     
     public TextEditorWindow() {
         initComponents();
+        this.colors = new ArrayList<>();
         this.document = textArea.getStyledDocument();
         document.addUndoableEditListener(undoManager);
         document.addDocumentListener(documentListener);
@@ -352,26 +355,26 @@ public class TextEditorWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemRedoActionPerformed
 
     private void colorMenuItemBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlueActionPerformed
-        changeColorOfSelectedText(Color.BLUE);
+        changeColorOfSelectedText(Color.BLUE, 1);
     }//GEN-LAST:event_colorMenuItemBlueActionPerformed
 
     private void colorMenuItemRedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemRedActionPerformed
-        changeColorOfSelectedText(Color.RED);
+        changeColorOfSelectedText(Color.RED, 2);
     }//GEN-LAST:event_colorMenuItemRedActionPerformed
 
     private void colorMenuItemBlackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemBlackActionPerformed
-        changeColorOfSelectedText(Color.BLACK);
+        changeColorOfSelectedText(Color.BLACK, 3);
     }//GEN-LAST:event_colorMenuItemBlackActionPerformed
 
     private void colorMenuItemYellowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemYellowActionPerformed
-        changeColorOfSelectedText(Color.YELLOW);
+        changeColorOfSelectedText(Color.YELLOW, 4);
     }//GEN-LAST:event_colorMenuItemYellowActionPerformed
 
     private void colorMenuItemGreenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorMenuItemGreenActionPerformed
-        changeColorOfSelectedText(Color.GREEN);
+        changeColorOfSelectedText(Color.GREEN, 5);
     }//GEN-LAST:event_colorMenuItemGreenActionPerformed
 
-    private void changeColorOfSelectedText(Color color)
+    private void changeColorOfSelectedText(Color color, int color_number)
     {
         int start = textArea.getSelectionStart();
         int end = textArea.getSelectionEnd();
@@ -379,7 +382,40 @@ public class TextEditorWindow extends javax.swing.JFrame {
         AttributeSet oldSet = this.document.getCharacterElement(end-1).getAttributes();
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aset = sc.addAttribute(oldSet, StyleConstants.Foreground, color);
-        this.document.setCharacterAttributes(start, selectedLength, aset, true);
+        this.document.setCharacterAttributes(start, selectedLength, aset, false);
+        addColorSetting(color_number, start, end);
+    }
+    
+    private void addColorSetting(int color_number, int start, int end){
+        ColorSetting new_color_setting = new ColorSetting(color_number, start, end);
+        ColorSetting new_half_two_colorSetting = null;
+        for(ColorSetting current_colorSetting: this.colors){
+            int current_start = current_colorSetting.start;
+            int current_end = current_colorSetting.end;
+            //the currentColorSetting is going to be overwriten
+            if(start < current_start && end > current_end){
+                this.colors.remove(current_colorSetting);
+            }else if(start < current_start && end > current_start && end < current_end){
+                current_colorSetting.start = end + 1;
+            }else if(start > current_start && start < current_end && end > current_end){
+                current_colorSetting.end = start - 1;
+                //the new colorSetting is between the current_ColorSetting
+                //it is necessary split it in two
+            }else if(start > current_start && end < current_end){
+                int new_half_one_end = start - 1;
+                int new_half_two_start = end + 1;
+                current_colorSetting.end = new_half_one_end;
+                new_half_two_colorSetting = new ColorSetting(current_colorSetting.color,  new_half_two_start, current_end);
+            }
+        }
+        if(new_half_two_colorSetting != null){
+            this.colors.add(new_half_two_colorSetting);
+        }
+        this.colors.add(new_color_setting);
+        for(ColorSetting colorSetting : this.colors){
+            System.out.println(colorSetting.toString());
+            
+        }
     }
     
     public void saveFile(){
