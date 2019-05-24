@@ -44,7 +44,7 @@ public class JSONFileFormat implements IFileFormat{
     /* Method that gets a Paragraph and return its lines modified as specified in the format
      * -> paragraph.text ... ["paragraph.text"]
      */
-<<<<<<< HEAD
+
     public void paragraphToJSONArray(Paragraph paragraph , int paragraphID , boolean isLastParagraph){
         if (paragraph.getLines().size() == 1){
             simpleParagraphToJSONArray(paragraph, paragraphID, isLastParagraph);
@@ -68,7 +68,7 @@ public class JSONFileFormat implements IFileFormat{
                     paragraph.getLines().remove(i);
                     paragraph.addLine(lastLine);
                 }
-=======
+
     public void paragraphToJSONArray(Paragraph paragraph , int paragraphID , boolean isLastArray){
         for (int i = 0 ; i < paragraph.getLines().size() ; i++){
             if (i == 0){
