@@ -44,6 +44,9 @@ public class TextEditorWindow extends javax.swing.JFrame {
     private StyledDocument document;
     //It will have the text color configuration, sorted by position
     private ArrayList<ColorSetting> colors;
+    private int lenght_of_document_before_change;
+    private int lenght_of_document_after_change;
+    private int caretPosition;
     
     public TextEditorWindow() {
         initComponents();
@@ -101,6 +104,17 @@ public class TextEditorWindow extends javax.swing.JFrame {
         panelMain.setBackground(new java.awt.Color(47, 53, 66));
 
         textArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        textArea.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textAreaKeyTyped(evt);
+            }
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textAreaKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textAreaKeyReleased(evt);
+            }
+        });
         jScrollPane3.setViewportView(textArea);
 
         javax.swing.GroupLayout panelMainLayout = new javax.swing.GroupLayout(panelMain);
@@ -375,6 +389,64 @@ public class TextEditorWindow extends javax.swing.JFrame {
         changeColorOfSelectedText(Color.GREEN, 5);
     }//GEN-LAST:event_colorMenuItemGreenActionPerformed
 
+    private void textAreaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyTyped
+        this.caretPosition = textArea.getCaretPosition();
+        this.lenght_of_document_after_change = textArea.getDocument().getLength();
+        updateColorSettings(this.lenght_of_document_before_change, this.lenght_of_document_after_change,
+                this.caretPosition);
+    }//GEN-LAST:event_textAreaKeyTyped
+
+    private void textAreaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyPressed
+        this.lenght_of_document_before_change = textArea.getDocument().getLength();
+    }//GEN-LAST:event_textAreaKeyPressed
+
+    private void textAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyReleased
+        //System.out.println(textArea.getDocument().getLength());
+    }//GEN-LAST:event_textAreaKeyReleased
+
+    private void updateColorSettings(int length_before, int lenght_after, int caretPos){
+        int toAdd = 1;
+        boolean isSubstract = false;
+        if(length_before > lenght_after){
+            toAdd = length_before - lenght_after;
+            isSubstract = true;
+        }
+        int previous_caretPos = caretPos + toAdd;
+        ArrayList<ColorSetting> to_delete = new ArrayList<>();
+        for(ColorSetting current_colorSetting : this.colors){
+            int current_start = current_colorSetting.start;
+            int current_end = current_colorSetting.end;
+            
+            //the colored word was deleted
+            if(current_start > caretPos && current_end < previous_caretPos){
+                to_delete.add(current_colorSetting);
+            }else if(current_start > caretPos && previous_caretPos > current_start && previous_caretPos < current_end){
+                current_colorSetting.start = previous_caretPos + 1;//should I add or substract one?
+            }else if(current_start < caretPos && previous_caretPos > current_start && previous_caretPos < current_end){
+                current_colorSetting.end =  current_start + ( caretPos - current_start) + (current_end - previous_caretPos);
+            }else if(current_start < caretPos && caretPos < current_end && current_end < previous_caretPos){
+                current_colorSetting.end = caretPos - 1;////should I add or substract one?
+            }else{
+                if(caretPos < current_start){
+                    if(isSubstract){
+                        current_colorSetting.start = current_colorSetting.start - toAdd;
+                        current_colorSetting.end = current_colorSetting.end - toAdd;
+                    }else{
+                        current_colorSetting.start = current_colorSetting.start + toAdd;
+                        current_colorSetting.end = current_colorSetting.end + toAdd;
+                    }
+                }
+            }
+        }
+        for(ColorSetting current_colorSetting : to_delete){
+            this.colors.remove(current_colorSetting);
+        }
+        
+        for(ColorSetting current_colorSetting : this.colors){
+            System.out.println(current_colorSetting.toString());
+        }
+    }
+    
     private void changeColorOfSelectedText(Color color, int color_number)
     {
         int start = textArea.getSelectionStart();
