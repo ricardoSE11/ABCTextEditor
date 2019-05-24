@@ -3,5 +3,5 @@ package abctexteditor.Files;
 
 
 public enum FileExtension {
-    TXT , TABBED_TXT , XML , CSV , PDF , JSON
+    TXT , TABTXT , XML , CSV , PDF , JSON
 }

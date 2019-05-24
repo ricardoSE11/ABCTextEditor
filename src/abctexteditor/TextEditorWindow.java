@@ -7,12 +7,15 @@ package abctexteditor;
 
 import abctexteditor.Files.FileExtension;
 import abctexteditor.Files.FileFormatter;
+import abctexteditor.Utils.Paragraph;
+import abctexteditor.Utils.StringHandler;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -295,9 +298,13 @@ public class TextEditorWindow extends javax.swing.JFrame {
             else{
                 String fileContent = textArea.getText();
                 fileName = currentFile.getName();
-
+  
+                String fileExtension = getFileExtension(fileName).toUpperCase();
+                FileExtension extension = FileExtension.valueOf(fileExtension);
+                String formattedText = fileFormatter.formatFile(fileContent, extension);
+                
                 FileWriter fileWriter = new FileWriter(currentFile);
-                fileWriter.write(fileContent);
+                fileWriter.write(formattedText);
                 this.setTitle(windowTitle + " - " + fileName);
                 fileWriter.close();
 
@@ -350,18 +357,22 @@ public class TextEditorWindow extends javax.swing.JFrame {
             }
             reader.close();            
             
+//            ArrayList<Paragraph> ps = StringHandler.getParagraphs(fileContent);
+//            for (int i = 0; i < ps.size(); i++) {
+//                System.out.println("P# " + i);
+//                System.out.println(ps.get(i).getText());
+//            }
+            
             fileName = currentFile.getName();
             String fileExtension = getFileExtension(fileName).toUpperCase();
             
             FileExtension extension = FileExtension.valueOf(fileExtension);
             
-            String formattedText = fileFormatter.formatFile(fileContent, extension);
+            String unformattedText = fileFormatter.unformatFile(fileContent, extension);
+            //System.out.println("FT: " + formattedText);
             
-            // Styles section
-            //Style redFont = textArea.add
-            // End of styles section
             
-            textArea.setText(formattedText);
+            textArea.setText(unformattedText);
             this.setTitle(windowTitle + " - " + fileName);
             
 
