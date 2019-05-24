@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/TextEditorWindow.java</file>
-            <file>file:/E:/Users/rshum/Documents/NetBeansProjects/ABCTextEditor/src/abctexteditor/Files/FileFormatter.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Files/IFileFormat.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Main.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/Files/FileSaverPDF.java</file>
+            <file>file:/C:/Users/juanj/OneDrive/Documents/I%20semestre%202019/Diseño/ABCTextEditor/src/abctexteditor/TextEditorWindow.java</file>
+
         </group>
     </open-files>
 </project-private>
