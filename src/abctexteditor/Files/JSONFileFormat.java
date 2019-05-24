@@ -50,8 +50,7 @@ public class JSONFileFormat implements IFileFormat{
                     lastLine += "," + "\n";
                 }
                 paragraph.getLines().remove(i);
-                paragraph.addLine(lastLine);
-                //paragraph.getLines().add(i, lastLine);
+                paragraph.getLines().add(i, lastLine);
             }
         }
     }
